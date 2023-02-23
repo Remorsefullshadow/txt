@@ -1,51 +1,76 @@
+local DiscordLib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt")()
+
+local win = DiscordLib:Window("Tutorial GUI")
+local visuals = win:Server("Visuals", "")
+local tgls = visuals:Channel("Toggles")
+
+local tracerState = false
 local Players = game:GetService("Players"):GetChildren()
+local localPlayer = game.Players.LocalPlayer
+local camera = game:GetService("Workspace").CurrentCamera
+local CurrentCamera = Workspace.CurrentCamera
 
-local RunService = game:GetService("RunService")
+for i,v in pairs(game.Players:GetChildren()) do
+    local Tracer = Drawing.new("Line")
+    Tracer.Visible = false
+    Tracer.Color = Color3.new(0,0,1)
+    Tracer.Thickness = 1
+    Tracer.Transparency = 1
 
-local highlight = Instance.new("Highlight")
+    local function lineesp()
+        game:GetService("RunService").RenderStepped:Connect(function()
+            if v.Character ~= nil and v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("HumanoidRootPart") ~= nil and v ~= localPlayer and v.Character.Humanoid.Health > 0 then
+                local Vector, OnScreen = camera:worldToViewportPoint(v.Character.HumanoidRootPart.Position)
 
-highlight.Name = "Highlight"
-
-local function getCharacter(player)
-    return
-    workspace:FindFirstChild(player.Name)
+                if OnScreen then
+                    Tracer.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+                    Tracer.To = Vector2.new(Vector.X, Vector.Y)
+                    Tracer.Visible = tracerState
+                else
+                    Tracer.Visible = false
+                end
+            else
+                Tracer.Visible = false
+            end
+        end)
+    end
+    coroutine.wrap(lineesp)()
 end
 
-for i, v in pairs(Players) do
-    repeat wait() until getCharacter(v)
-    if not getCharacter(v):FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
-        local highlightClone = highlight:Clone()
-        highlightClone.Adornee = getCharacter(v)
-        highlightClone.Parent = getCharacter(v):FindFirstChild("HumanoidRootPart")
-        highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-        highlightClone.Name = "Highlight"
-    end
-end
+game.Players.PlayerAdded:Connect(function(v)
+        local Tracer = Drawing.new("Line")
+    Tracer.Visible = false
+    Tracer.Color = Color3.new(1,1,1)
+    Tracer.Thickness = 1
+    Tracer.Transparency = 1
 
-game.Players.PlayerAdded:Connect(function(player)
-    repeat wait() until getCharacter(v)
-    if not getCharacter(v):FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
-        local highlightClone = highlight:Clone()
-        highlightClone.Adornee = getCharacter(v)
-        highlightClone.Parent = getCharacter(v):FindFirstChild("HumanoidRootPart")
-        highlightClone.Name = "Highlight"
+    local function lineesp()
+        game:GetService("RunService").RenderStepped:Connect(function()
+            if v.Character ~= nil and v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("HumanoidRootPart") ~= nil and v ~= localPlayer and v.Character.Humanoid.Health > 0 then
+                local Vector, OnScreen = camera:worldToViewportPoint(v.Character.HumanoidRootPart.Position)
+
+                if OnScreen then
+                    Tracer.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+                    Tracer.To = Vector2.new(Vector.X, Vector.Y)
+                    
+                    Tracer.Visible = tracerState
+                else
+                    Tracer.Visible = false
+                end
+            else
+                Tracer.Visible = false
+            end
+        end)
     end
+    coroutine.wrap(lineesp)()
 end)
 
-game.Players.PlayerRemoving:Connect(function(playerRemoved)
-    playerRemoved.Character:FindFirstChild("HumanoidRootPart").Highlight:Destroy()
-end)
 
-RunService.Heartbeat:Connect(function()
-    for i, v in pairs(Players) do
-        repeat wait() until getCharacter(v)
-        if not getCharacter(v):FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
-            local highlightClone = highlight:Clone()
-            highlightClone.Adornee = getCharacter(v)
-            highlightClone.Parent = getCharacter(v):FindFirstChild("HumanoidRootPart")
-            highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            highlightClone.Name = "Highlight"
-            task.wait()
-        end
-end
+
+tgls:Toggle("Visuals",false, function(bool)
+    if bool then
+        tracerState = true
+    else
+        tracerState = false
+    end
 end)
